@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"fmt"
 	"github.com/fritzkeyzer/go-fkv"
 	"github.com/fritzkeyzer/go-fkv/disk"
 	"github.com/fritzkeyzer/go-fkv/mem"
@@ -8,6 +9,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -22,7 +24,13 @@ func TestMemKV(t *testing.T) {
 }
 
 func TestStorjKV(t *testing.T) {
-	kv, err := storj.NewKV("test-bucket", os.Getenv("STORJ_ACCESS"))
+	token := os.Getenv("STORJ_ACCESS")
+	if len(strings.TrimSpace(token)) == 0 {
+		fmt.Println("Unable to test storj KV. 'STORJ_ACCESS' env variable not set")
+		return
+	}
+
+	kv, err := storj.NewKV("test-bucket", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,25 +48,25 @@ func test(kv fkv.FKV, t *testing.T) {
 	}
 
 	var o2 Object
-	if f, err := kv.Get("file0", &o2); err != nil || !f {
+	if f, err := kv.Get("file0", &o2); err != nil {
 		t.Fatal(err)
+	} else if !f {
+		t.Fatalf("could not find fil0")
 	}
 
 	if !reflect.DeepEqual(o1, o2) {
 		t.Fatalf("got != want:\n\tgot: %v\n\twant: %v", o2, o1)
 	}
 
-	//if err := kv.Delete("file0"); err != nil {
-	//	t.Fatal(err)
-	//}
+	if err := kv.Delete("file0"); err != nil {
+		t.Fatal(err)
+	}
 
 	var o3 Object
-	found, err := kv.Get("file1", &o3)
-	if found {
-		t.Fatalf("file1 should not exist!")
-	}
-	if err != nil {
+	if found, err := kv.Get("file0", &o3); err != nil {
 		t.Fatalf("expect no error, got: %v", err)
+	} else if found {
+		t.Fatalf("file0 should not exist!")
 	}
 }
 
