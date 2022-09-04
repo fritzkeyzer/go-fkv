@@ -1,9 +1,9 @@
 package disk
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	json "github.com/json-iterator/go"
 	"os"
 	"path/filepath"
 )
@@ -40,7 +40,7 @@ func (kv *KV) Get(key string, ptr any) (found bool, err error) {
 }
 
 func (kv *KV) Set(key string, object any) error {
-	data, err := json.Marshal(object)
+	data, err := json.MarshalIndent(object, "", "\t")
 	if err != nil {
 		return fmt.Errorf("encoding: %v", err)
 	}
