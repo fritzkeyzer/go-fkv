@@ -60,3 +60,11 @@ func (kv *KV) Delete(key string) error {
 
 	return nil
 }
+
+func (kv *KV) List(ptr *[]string) error {
+	for k := range kv.objects {
+		*ptr = append(*ptr, k)
+	}
+
+	return nil
+}

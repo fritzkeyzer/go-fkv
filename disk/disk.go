@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // todo file locks
@@ -68,4 +69,22 @@ func (kv *KV) Delete(key string) error {
 	}
 
 	return nil
+}
+
+func (kv *KV) List(ptr *[]string) error {
+	err := filepath.Walk(kv.dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		path = strings.TrimPrefix(path, kv.dir)
+		cleanPath := strings.TrimPrefix(path, "/")
+
+		if !info.IsDir() {
+			*ptr = append(*ptr, cleanPath)
+		}
+		return nil
+	})
+
+	return err
 }

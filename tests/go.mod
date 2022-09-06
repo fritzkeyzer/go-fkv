@@ -1,4 +1,4 @@
-module tests
+module github.com/fritzkeyzer/go-fkv/tests
 
 go 1.19
 
